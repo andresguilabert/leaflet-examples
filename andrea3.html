@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>© Andres Guilabert</title>
+  <title>Noor & Hubb</title>
 
   <!-- Leaflet -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
@@ -211,32 +211,32 @@ function formatLength(value) {
   // -------------------------
   // 6. TOGGLE DATA VISIBILITY
   // -------------------------
-  var dataVisible = true;
+  // var dataVisible = true;
 
-  var toggleControl = L.control({ position: 'topright' });
+  // var toggleControl = L.control({ position: 'topright' });
 
-  toggleControl.onAdd = function(map) {
-    var button = L.DomUtil.create('button', 'leaflet-bar');
-    button.innerHTML = 'Hide layer';
+  // toggleControl.onAdd = function(map) {
+  //   var button = L.DomUtil.create('button', 'leaflet-bar');
+  //   button.innerHTML = 'Hide layer';
 
-    button.style.width = '90px';
-    button.style.height = '32px';
-    button.style.padding = '5px 10px';
-    button.style.textAlign = 'center';
-    button.style.whiteSpace = 'nowrap';
+  //   button.style.width = '90px';
+  //   button.style.height = '32px';
+  //   button.style.padding = '5px 10px';
+  //   button.style.textAlign = 'center';
+  //   button.style.whiteSpace = 'nowrap';
 
-    L.DomEvent.on(button, 'click', function(e) {
-      L.DomEvent.stopPropagation(e);
-      dataVisible = !dataVisible;
+  //   L.DomEvent.on(button, 'click', function(e) {
+  //     L.DomEvent.stopPropagation(e);
+  //     dataVisible = !dataVisible;
 
-      map.getPane('dataPane').style.display = dataVisible ? '' : 'none';
-      button.innerHTML = dataVisible ? 'Hide layer' : 'Show layer';
-    });
+  //     map.getPane('dataPane').style.display = dataVisible ? '' : 'none';
+  //     button.innerHTML = dataVisible ? 'Hide layer' : 'Show layer';
+  //   });
 
-    return button;
-  };
+  //   return button;
+  // };
 
-  toggleControl.addTo(map);
+  // toggleControl.addTo(map);
 
 
 
