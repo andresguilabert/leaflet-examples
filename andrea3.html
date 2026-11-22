@@ -94,20 +94,26 @@
   // -------------------------
   // 3. LAYER STYLE
   // -------------------------
-  
-        function pointToLayer(feature, latlng) {
-            return L.circleMarker(latlng, {
-                pane: 'dataPane',
-                radius: feature.properties.point_size_px,
-                fillColor: feature.properties.fill_color,
-                fillOpacity: feature.properties.fill_opacity,
-                color: feature.properties.outline_color,
-                opacity: feature.properties.outline_opacity,
-                weight: feature.properties.outline_width_px
-            });
-        }
 
-
+const redPin = L.divIcon({
+    className: '',
+    html: `
+        <svg width="25" height="41" viewBox="0 0 25 41"
+             xmlns="http://www.w3.org/2000/svg">
+            <path d="M12.5 0C5.6 0 0 5.6 0 12.5
+                     C0 21.5 12.5 41 12.5 41
+                     S25 21.5 25 12.5
+                     C25 5.6 19.4 0 12.5 0Z"
+                  fill="#e60000"
+                  stroke="#8b0000"
+                  stroke-width="1"/>
+            <circle cx="12.5" cy="12.5" r="4.5"
+                    fill="white"/>
+        </svg>
+    `,
+    iconSize: [25, 41],
+    iconAnchor: [12.5, 41]
+});
   
   // -------------------------
   // 4. TOOLTIP 
