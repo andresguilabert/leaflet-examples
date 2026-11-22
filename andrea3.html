@@ -1,0 +1,329 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>© Andres Guilabert</title>
+
+  <!-- Leaflet -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+  <!-- Esri Leaflet -->
+  <script src="https://unpkg.com/esri-leaflet@3.0.19/dist/esri-leaflet.js"></script>
+
+  <!-- Esri Leaflet Vector -->
+  <script src="https://unpkg.com/esri-leaflet-vector@4.3.2/dist/esri-leaflet-vector.js"></script>
+
+  <style>
+    body { margin: 0; }
+
+    #map {
+      height: 100vh;
+    }
+
+    .tooltip-content {
+      display: grid;
+      grid-template-columns: auto auto;
+      column-gap: 30px;
+      font-family: 'Lucida Sans Unicode', 'Lucida Grande', sans-serif;
+      font-size: 16px;
+      line-height: 1.40;
+    }
+
+    .tooltip-content span:nth-child(even) {
+      text-align: right;
+    }
+
+  
+  </style>
+
+</head>
+
+<body>
+
+<div id="map"></div>
+
+<script>
+
+  // -------------------------
+  // 1. MAP
+  // -------------------------
+  var map = L.map('map', {
+    zoomControl: true,
+    zoomSnap: 0.25})
+ 
+
+  map.getContainer().style.background = '#00000000';
+
+ 
+  // -------------------------
+  // 2. BASE MAP
+  // -------------------------
+  map.createPane('referencePane01');
+  map.getPane('referencePane01').style.pointerEvents = 'none';
+  map.getPane('referencePane01').style.zIndex = 250;
+ 
+  map.createPane('referencePane02');
+  map.getPane('referencePane02').style.pointerEvents = 'none';
+  map.getPane('referencePane02').style.zIndex = 300;
+  
+  const basemap01 = 
+    // Vector Tile Layer
+    L.esri.Vector.vectorTileLayer("d7397603e9274052808839b70812be50", {
+    pane: "referencePane01",
+    attribution: '© Esri'
+    }).addTo(map);
+
+    ;
+  const basemap02 = 
+    // Vector Tile Layer
+    L.esri.Vector.vectorTileLayer("1ddbb25aa29c4811aaadd94de469856a", {
+    pane: "referencePane02",
+    attribution: '© Esri'
+    }).addTo(map);
+
+    ;
+
+  if (basemap01) map.addLayer(basemap01);
+  if (basemap02) map.addLayer(basemap02);
+  
+
+  
+  // -------------------------
+  // 3. LAYER STYLE
+  // -------------------------
+  
+        function pointToLayer(feature, latlng) {
+            return L.circleMarker(latlng, {
+                pane: 'dataPane',
+                radius: feature.properties.point_size_px,
+                fillColor: feature.properties.fill_color,
+                fillOpacity: feature.properties.fill_opacity,
+                color: feature.properties.outline_color,
+                opacity: feature.properties.outline_opacity,
+                weight: feature.properties.outline_width_px
+            });
+        }
+
+
+  
+  // -------------------------
+  // 4. TOOLTIP 
+  // -------------------------
+
+function formatArea(value) {
+    if (value == null || !Number.isFinite(Number(value))) return '';
+    value = Number(value);
+    if (value < 10000) {
+        return `${value.toFixed(2)} m²`;
+    } else if (value < 1000000) {
+        return `${(value / 10000).toFixed(2)} ha`;
+    } else {
+        return `${(value / 1000000).toFixed(2)} km²`;
+    }
+}
+
+function formatLength(value) {
+    if (value == null || !Number.isFinite(Number(value))) return '';
+    value = Number(value);
+    if (value < 1000) {
+        return `${value.toFixed(2)} m`;
+    } else {
+        return `${(value / 1000).toFixed(2)} km`;
+    }
+}
+
+  const tooltip = L.tooltip({
+    sticky: false,
+    opacity: 0.9,
+    direction: 'auto'
+  });
+  
+  function onEachFeature(feature, layer) {
+/*
+
+
+  if (L.Browser.mobile) {
+
+    layer.on('click', function (e) {
+      tooltip
+        .setContent()
+        .setLatLng(e.latlng)
+        .addTo(map)
+        .openOn(map);
+    });
+
+  } else {
+
+    layer.on('mouseover', function (e) {
+      tooltip
+        .setContent()
+        .setLatLng(e.latlng)
+        .addTo(map)
+        .openOn(map);
+    });
+
+    layer.on('mousemove', function (e) {
+      tooltip.setLatLng(e.latlng);
+    });
+
+    layer.on('mouseout', function () {
+      map.closeTooltip(tooltip);
+    });
+
+  }
+
+*/
+    }
+
+    
+  // -------------------------
+  // 5. DATA LAYER
+  // -------------------------
+  map.createPane('dataPane');
+  map.getPane('dataPane').style.zIndex = 400;
+  map.getPane('dataPane').style.opacity = 1.0;
+  map.getPane('dataPane').style.mixBlendMode = "normal";
+  var layer = L.geoJSON(null, {
+    pane: 'dataPane',
+    pointToLayer: pointToLayer,
+    onEachFeature: onEachFeature
+  }).addTo(map);
+
+
+  // -------------------------
+  // 6. TOGGLE DATA VISIBILITY
+  // -------------------------
+  var dataVisible = true;
+
+  var toggleControl = L.control({ position: 'topright' });
+
+  toggleControl.onAdd = function(map) {
+    var button = L.DomUtil.create('button', 'leaflet-bar');
+    button.innerHTML = 'Hide layer';
+
+    button.style.width = '90px';
+    button.style.height = '32px';
+    button.style.padding = '5px 10px';
+    button.style.textAlign = 'center';
+    button.style.whiteSpace = 'nowrap';
+
+    L.DomEvent.on(button, 'click', function(e) {
+      L.DomEvent.stopPropagation(e);
+      dataVisible = !dataVisible;
+
+      map.getPane('dataPane').style.display = dataVisible ? '' : 'none';
+      button.innerHTML = dataVisible ? 'Hide layer' : 'Show layer';
+    });
+
+    return button;
+  };
+
+  toggleControl.addTo(map);
+
+
+
+  // -------------------------
+  // 7. REFERENCE LAYER
+  // -------------------------
+  map.createPane('referencePane1');
+  map.getPane('referencePane1').style.pointerEvents = 'none';
+  map.getPane('referencePane1').style.zIndex = 500;
+  
+  map.createPane('referencePane2');
+  map.getPane('referencePane2').style.pointerEvents = 'none';
+  map.getPane('referencePane2').style.zIndex = 550;
+  
+  const reference_layer1 = null;
+  const reference_layer2 = 
+            // Vector Tile Layer
+            L.esri.Vector.vectorTileLayer("4a3922d6d15f405d8c2b7a448a7fbad2", {
+            attribution: '© Esri',
+            pane: 'referencePane2'
+            }).addTo(map);
+        
+            ;
+
+  if (reference_layer1) map.addLayer(reference_layer1);
+  if (reference_layer2) map.addLayer(reference_layer2);
+
+
+// -------------------------
+// 8. TOGGLE SATELLITE
+// -------------------------
+
+const satellite = L.esri.tiledMapLayer({
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer',
+    pane: 'referencePane01'
+});
+
+const hybrid = L.esri.Vector.vectorTileLayer("30d6b8271e1849cd9c3042060001f425", {
+    attribution: '© Esri',
+    pane: 'referencePane2'
+});
+
+var satelliteVisible = false;
+
+var satelliteControl = L.control({ position: 'topright' });
+
+satelliteControl.onAdd = function(map) {
+    var button = L.DomUtil.create('button', 'leaflet-bar');
+    button.innerHTML = 'Satellite';
+
+    button.style.width = '90px';
+    button.style.height = '32px';
+    button.style.padding = '5px 10px';
+    button.style.textAlign = 'center';
+    button.style.whiteSpace = 'nowrap';
+
+    L.DomEvent.on(button, 'click', function(e) {
+        L.DomEvent.stopPropagation(e);
+        satelliteVisible = !satelliteVisible;
+
+        if (satelliteVisible) {
+            if (reference_layer1) map.removeLayer(reference_layer1);
+            if (reference_layer2) map.removeLayer(reference_layer2);
+            if (basemap01) map.removeLayer(basemap01);
+            if (basemap02) map.removeLayer(basemap02);
+
+
+            map.addLayer(satellite);
+            map.addLayer(hybrid);
+
+        } else {
+            map.removeLayer(satellite);
+            map.removeLayer(hybrid);
+
+            if (reference_layer1) map.addLayer(reference_layer1);
+            if (reference_layer2) map.addLayer(reference_layer2);
+            if (basemap01) map.addLayer(basemap01);
+            if (basemap02) map.addLayer(basemap02);
+        }
+
+        button.innerHTML = satelliteVisible ? 'Map' : 'Satellite';
+    });
+
+    return button;
+};
+
+satelliteControl.addTo(map);
+
+
+
+  
+  // -------------------------
+  // 9. GEOJSON DATA LOADING AND ZOOM
+  // -------------------------
+  
+        const datos = {"type":"FeatureCollection","features":[{"type":"Feature","id":1,"geometry":{"type":"Point","coordinates":[-0.52532751395620936,38.398513110090995]},"properties":{"OBJECTID":1,"fill_color":"#E60000","fill_opacity":1,"outline_color":"#000000","outline_opacity":1,"outline_width_px":0.79999999999999993,"point_size_px":8}}]};
+        layer.addData(datos);
+        
+            map.fitBounds([[38.39420544391412, -0.5307322336555603],[38.40224613029445, -0.5187919179400441]]);
+            ;
+
+</script>
+
+</body>
+</html>
