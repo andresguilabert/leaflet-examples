@@ -114,6 +114,15 @@ const redPin = L.divIcon({
     iconSize: [25, 41],
     iconAnchor: [12.5, 41]
 });
+
+
+
+function pointToLayer(feature, latlng) {
+    return L.marker(latlng, {
+        pane: 'dataPane',
+        icon: redPin
+    });
+}
   
   // -------------------------
   // 4. TOOLTIP 
