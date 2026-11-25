@@ -360,6 +360,44 @@ toggleControl.addTo(map);
 
 
 
+// -------------------------
+// CLICK HIGHLIGHT
+// -------------------------
+
+let selectedLayer = null;
+
+layer.eachLayer(function(feature) {
+
+    feature.on('click', function(e) {
+
+        if (selectedLayer) {
+            layer.resetStyle(selectedLayer);
+        }
+
+        selectedLayer = feature;
+
+        feature.setStyle({
+        weight: 3,
+        color: '#56B4E9',
+        fillColor: '#56B4E9',
+        fillOpacity: 0.45
+    });
+
+        feature.bringToFront();
+    });
+
+});
+
+
+
+
+
+
+
+
+
+
+
 </script>
 
 </body>
