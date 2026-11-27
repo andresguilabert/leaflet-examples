@@ -89,6 +89,13 @@
         }
     }
   
+    @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .leaflet-bottom {
+        bottom: env(safe-area-inset-bottom);
+        }
+    }
+
+
   </style>
 
 </head>
